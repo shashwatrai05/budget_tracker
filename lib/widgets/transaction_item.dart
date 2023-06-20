@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../modals/transaction.dart';
+import '../providers/transaction.dart';
 import 'package:intl/intl.dart';
 
 class TransactionItem extends StatefulWidget {
@@ -10,7 +10,7 @@ class TransactionItem extends StatefulWidget {
     required this.deleteTx,
   });
 
-  final Expenses transaction;
+  final Expense transaction;
   final Function deleteTx;
 
   @override

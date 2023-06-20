@@ -1,12 +1,15 @@
+//import 'package:flutter/foundation.dart';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-class Expenses {
+class Expense with ChangeNotifier{
   final String id;
   final String title;
   final double amount;
   final DateTime date;
 
- Expenses({
+ Expense({
     required this.id,
     required this.title,
     required this.amount,

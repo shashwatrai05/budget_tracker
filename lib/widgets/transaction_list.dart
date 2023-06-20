@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter/rendering.dart';
-import '../modals/transaction.dart';
+import '../providers/transaction.dart';
 import './transaction_item.dart';
 
 class TransactionList extends StatelessWidget {
-  final List<Expenses> transactions;
+  final List<Expense> transactions;
   final Function deleteTx;
 
   TransactionList(this.transactions, this.deleteTx);
