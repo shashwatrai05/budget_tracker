@@ -97,7 +97,7 @@ class Auth with ChangeNotifier {
     _userId = null;
     _expirydate = null;
     if (_authTimer != null) {
-      _authTimer!.cancel();
+      _authTimer?.cancel();
       _authTimer = null;
     }
     notifyListeners();
@@ -108,9 +108,9 @@ class Auth with ChangeNotifier {
 
   void _autoLogout() {
     if (_authTimer != null) {
-      _authTimer!.cancel();
+      _authTimer?.cancel();
     }
-    final timeToExpiry = _expirydate!.difference(DateTime.now()).inSeconds;
-    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
+    final timeToExpiry = _expirydate?.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiry!), logout);
   }
 }

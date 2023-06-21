@@ -26,13 +26,16 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (ctx) => Auth()),
         ChangeNotifierProxyProvider<Auth, Expenses>(
-         create: (_) => Expenses('', '', []), 
-          update: (ctx, auth, previousProducts) => Expenses(
-            auth.token?? '',
-            auth.userId?? '',
-            previousProducts == null ? [] : previousProducts.payments,
-          ),
-        ),
+  create: (_) => Expenses('', '', []),
+  update: (ctx, auth, previousProducts) => Expenses(
+    auth.token ?? '',
+    auth.userId ?? '',
+    previousProducts == null
+      ? []
+      : previousProducts.payments,
+  ),
+)
+
       ],
       child: Consumer<Auth>(
         builder: (ctx, auth, _) => MaterialApp(
@@ -67,7 +70,7 @@ class MyApp extends StatelessWidget {
                   },
                 ),
                 routes: {
-                 // MyHomePage.routeName:(ctx)=>MyHomePage(),
+                  //MyHomePage.routeName:(ctx)=>MyHomePage(),
                   AuthScreen.routeName:(ctx)=> AuthCard(),
                 },
         ),

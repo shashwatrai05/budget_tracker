@@ -11,7 +11,7 @@ import '../providers/transaction.dart';
 import 'auth_screen.dart';
 
 class MyHomePage extends StatefulWidget {
-  //static const routeName= '/';
+  static const routeName= '/';
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -140,12 +140,16 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: const Icon(Icons.edit),
           onPressed: () => _setBudget(context),
         ),
-        IconButton(onPressed: (){
-          Navigator.of(context).pop();
-              Navigator.of(context).popUntil((route) => route.isFirst);
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AuthScreen()));
-              Provider.of<Auth>(context, listen: false).logout();
-        }, icon: Icon(Icons.exit_to_app))
+     IconButton(
+  onPressed: () async {
+    await Provider.of<Auth>(context, listen: false).logout();
+    Navigator.of(context).pop();
+  },
+  icon: Icon(Icons.exit_to_app),
+)
+
+
+
       ],
     );
 

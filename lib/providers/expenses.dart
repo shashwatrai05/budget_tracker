@@ -20,11 +20,11 @@ class Expenses with ChangeNotifier {
     return _userTransactions.firstWhere((trax) => trax.id == id);
   }
 
-  Future<void> fetchAndSetExpenses() async {
-  //final authTokens = '...'; // Your authentication tokens
+  Future<void> fetchAndSetExpenses([bool filterByUser = false]) async {
+final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
 
   var url =
-      'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses.json?$authTokens';
+      'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses.json?$authTokens&$filterString';
 
   try {
     final response = await http.get(Uri.parse(url));
@@ -32,7 +32,7 @@ class Expenses with ChangeNotifier {
     if (extractedData == null) {
       return;
     }
-
+  final List<Expense> loadedProducts = [];
     extractedData.forEach((txnId, txnData) {
       _userTransactions.add(Expense(
         id: txnId,
@@ -41,6 +41,7 @@ class Expenses with ChangeNotifier {
         date: DateTime.parse(txnData['date']),
       ));
     });
+    _userTransactions=loadedProducts;
     notifyListeners();
   } catch (error) {
     print('Error fetching expenses: $error');
