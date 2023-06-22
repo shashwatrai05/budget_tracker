@@ -144,6 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
   onPressed: () async {
     await Provider.of<Auth>(context, listen: false).logout();
     Navigator.of(context).pop();
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AuthScreen()));
   },
   icon: Icon(Icons.exit_to_app),
 )

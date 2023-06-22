@@ -12,44 +12,35 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
-    // final transformConfig = Matrix4.rotationZ(-8 * pi / 180);
-    // transformConfig.translate(-10.0);
+   
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
+    
       body: Stack(
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color.fromRGBO(215, 117, 255, 1).withOpacity(0.5),
-                  const Color.fromRGBO(255, 188, 117, 1).withOpacity(0.9),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                stops: const [0, 1],
-              ),
+              color: Color.fromARGB(255, 83, 176, 194)
             ),
           ),
           SingleChildScrollView(
             child: Container(
+
               height: deviceSize.height,
               width: deviceSize.width,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Flexible(
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 20.0),
+                      height: 280,
+                      width: 350,
+                      margin: const EdgeInsets.only(bottom: 20.0,top: 80 ),
                       padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 94.0),
-                      transform: Matrix4.rotationZ(-8 * pi / 180)
-                        ..translate(-10.0),
-                      // ..translate(-10.0),
+                          vertical: 4.0, horizontal: 4.0),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.deepOrange.shade900,
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.white,
                         boxShadow: const [
                           BoxShadow(
                             blurRadius: 8,
@@ -58,18 +49,7 @@ class AuthScreen extends StatelessWidget {
                           )
                         ],
                       ),
-                      child: Text(
-                        'MyShop',
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .accentTextTheme
-                              .titleLarge!
-                              .color,
-                          fontSize: 50,
-                          fontFamily: 'Anton',
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
+                      child: Image(image: AssetImage('assets/images/undraw_Savings_re_eq4w.png'))
                     ),
                   ),
                   Flexible(
