@@ -19,12 +19,14 @@ class Expenses with ChangeNotifier {
   Expense findById(String id) {
     return _userTransactions.firstWhere((trax) => trax.id == id);
   }
-
-  Future<void> fetchAndSetExpenses([bool filterByUser = false]) async {
-final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+/*
+  Future<void> fetchAndSetExpenses() async {
+   // [bool filterByUser = false]
+//final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
 
   var url =
-      'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses.json?$authTokens&$filterString';
+      'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses.json?$authTokens';
+      //&$filterString';
 
   try {
     final response = await http.get(Uri.parse(url));
@@ -35,9 +37,9 @@ final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : ''
   final List<Expense> loadedProducts = [];
     extractedData.forEach((txnId, txnData) {
       _userTransactions.add(Expense(
-        id: txnId,
+        id:  txnId,
         title: txnData['title'],
-        amount: txnData['amount'],
+        amount: double.parse(txnData['amount']),
         date: DateTime.parse(txnData['date']),
       ));
     });
@@ -47,6 +49,39 @@ final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : ''
     print('Error fetching expenses: $error');
   }
 }
+*/
+Future<void> fetchAndSetExpenses( [bool filterByUser = false]) async {
+  final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+  final url =
+      'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses.json?auth=$authTokens&$filterString';
+
+  try {
+    final response = await http.get(Uri.parse(url));
+    final extractedData = json.decode(response.body) as Map<String, dynamic>?;
+    if (extractedData == null) {
+      return;
+    }
+
+    List<Expense> loadedExpenses = [];
+   loadedExpenses = extractedData.entries.map((entry) {
+  final txnId = entry.key;
+  final txnData = entry.value;
+  return Expense(
+    id: txnId,
+    title: txnData['title'],
+    amount: double.parse(txnData['amount'].toString()),
+    date: DateTime.parse(txnData['date']),
+  );
+}).toList();
+
+
+    _userTransactions = loadedExpenses;
+    notifyListeners();
+  } catch (error) {
+    print('Error fetching expenses: $error');
+  }
+}
+
 
 
 
@@ -79,20 +114,22 @@ final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : ''
   }
 
   Future<void> deleteExpense(String id) async {
-    final url =
-        'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses/$id.json?auth=$authTokens';
-    final existingExpenseIndex =
-        _userTransactions.indexWhere((prod) => prod.id == id);
-    var existingExpense = _userTransactions[existingExpenseIndex];
-    _userTransactions.removeAt(existingExpenseIndex);
-    notifyListeners();
-    final response = await http.delete(Uri.parse(url));
-    if (response.statusCode >= 400) {
-      _userTransactions.insert(existingExpenseIndex, existingExpense);
-      notifyListeners();
-      throw HttpException('Could not delete product');
-    }
+  final url = 'https://budget-tracker-2418e-default-rtdb.firebaseio.com/expenses/$id.json?auth=$authTokens';
+  final existingExpenseIndex = _userTransactions.indexWhere((expense) => expense.id == id);
+  if (existingExpenseIndex == -1) {
+    // Expense not found, handle the error or return
+    return;
   }
+  var existingExpense = _userTransactions[existingExpenseIndex];
+  _userTransactions.removeAt(existingExpenseIndex);
+  notifyListeners();
+  final response = await http.delete(Uri.parse(url));
+  if (response.statusCode >= 400) {
+    _userTransactions.insert(existingExpenseIndex, existingExpense);
+    notifyListeners();
+    throw HttpException('Could not delete expense');
+  }
+}
 
   Future<void> setBudget(double budget) async {
    final url =
