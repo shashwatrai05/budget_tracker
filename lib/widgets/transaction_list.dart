@@ -22,12 +22,7 @@ class TransactionList extends StatelessWidget {
                 const SizedBox(
                   height: 20,
                 ),
-                Container(
-                    height: constraints.maxHeight*0.7,
-                    child: Image.asset(
-                      'assets/images/NoTransaction.webp',
-                      fit: BoxFit.cover,
-                    )),
+                
               ],
             );
           }) 

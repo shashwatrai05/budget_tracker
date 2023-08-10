@@ -11,15 +11,16 @@ import '../providers/transaction.dart';
 import 'auth_screen.dart';
 
 class MyHomePage extends StatefulWidget {
-  static const routeName= '/';
+  static const routeName = '/';
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   double _budget = 0.0;
-
   List<Expense> _extractedTransactions = [];
+  bool _isLoading = false;
 
   List<Expense> get _recentTransactions {
     return _extractedTransactions.where((tx) {
@@ -31,14 +32,30 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
+  double get _spentAmount {
+    double spentAmount = 0.0;
+    for (final expense in _extractedTransactions) {
+      spentAmount += expense.amount;
+    }
+    return spentAmount;
+  }
+
   Future<void> _fetchAndSetTransactions() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await Provider.of<Expenses>(context, listen: false).fetchAndSetExpenses();
       final expenses = Provider.of<Expenses>(context, listen: false).payments;
       setState(() {
         _extractedTransactions = expenses;
+        _isLoading = false;
       });
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       // Handle error
     }
   }
@@ -69,19 +86,22 @@ class _MyHomePageState extends State<MyHomePage> {
     _fetchAndSetBudget();
   }
 
-  void _addNewTransaction(
-      String expTitle, double expAmount, DateTime chosenDate) {
-    final newExp = Expense(
-      title: expTitle,
-      amount: expAmount,
-      date: chosenDate,
-      id: DateTime.now().toString(),
-    );
+  Future<void> _addNewTransaction(String expTitle, double expAmount, DateTime chosenDate) async {
+  final newExp = await Expense(
+    title: expTitle,
+    amount: expAmount,
+    date: chosenDate,
+    id: DateTime.now().toString(),
+  );
 
-    Provider.of<Expenses>(context, listen: false).addExpense(newExp);
-  }
+  Provider.of<Expenses>(context, listen: false).addExpense(newExp);
 
-  void _startAddNewTransaction(BuildContext ctx) {
+  setState(() {
+    _extractedTransactions.add(newExp);
+  });
+}
+
+  _startAddNewTransaction(BuildContext ctx) {
     showModalBottomSheet(
       context: ctx,
       builder: (_) {
@@ -95,17 +115,29 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _deleteTransaction(String id) {
-    Provider.of<Expenses>(context, listen: false).deleteExpense(id);
-  }
+  final deletedTransaction = _extractedTransactions.firstWhere((tx) => tx.id == id);
+  Provider.of<Expenses>(context, listen: false).deleteExpense(id);
 
+  setState(() {
+    _extractedTransactions.removeWhere((tx) => tx.id == id);
+  });
+}
   Future<void> _fetchAndSetBudget() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await Provider.of<Expenses>(context, listen: false).fetchAndSetBudget();
       final budget = Provider.of<Expenses>(context, listen: false).budget;
       setState(() {
         _budget = budget;
+        _isLoading = false;
       });
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       // Handle error
     }
   }
@@ -114,11 +146,13 @@ class _MyHomePageState extends State<MyHomePage> {
       MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
     return [
       Container(
-        height:
-            (mediaQuery.size.height - appBar.preferredSize.height - mediaQuery.padding.top) *
-                0.3,
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.3,
         child: Chart(_recentTransactions, _budget),
       ),
+      
       txListWidget,
     ];
   }
@@ -140,25 +174,27 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: const Icon(Icons.edit),
           onPressed: () => _setBudget(context),
         ),
-     IconButton(
-  onPressed: () async {
-    await Provider.of<Auth>(context, listen: false).logout();
-    Navigator.of(context).pop();
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AuthScreen()));
-  },
-  icon: Icon(Icons.exit_to_app),
-)
-
-
-
+        IconButton(
+          onPressed: () async {
+            await Provider.of<Auth>(context, listen: false).logout();
+            Navigator.of(context).pop();
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (ctx) => AuthScreen()),
+            );
+          },
+          icon: Icon(Icons.exit_to_app),
+        ),
       ],
     );
 
     final txListWidget = Consumer<Expenses>(
       builder: (ctx, expenses, _) {
+        final _extractedTransactions = expenses.payments;
         return Container(
-          height: (mediaQuery.size.height - appBar.preferredSize.height - mediaQuery.padding.top) *
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
               0.7,
           child: TransactionList(_extractedTransactions, _deleteTransaction),
         );
@@ -182,7 +218,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: appBar,
-      body: pageBody,
+      body: Stack(
+        children: [
+          pageBody,
+          Visibility(
+            visible: _isLoading,
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+        ],
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
